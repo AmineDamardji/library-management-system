@@ -156,6 +156,22 @@ class BookController {
         );
         return result;
     }
+    public async searchBooks(query: string): Promise<Book[]> {
+      const vector = await getEmbeddings(query);
+      const aggregationPipeline = [
+        {
+          $vectorSearch: {
+            queryVector:  vector,
+            path: 'embeddings',
+            numCandidates: 100,
+            index: 'vectorsearch',
+            limit: 100,
+          }
+        }
+      ];
+      const books = await collections?.books?.aggregate(aggregationPipeline).toArray() as Book[];
+      return books;
+    }
 }
 
 export default BookController;
